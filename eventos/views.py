@@ -98,7 +98,7 @@ def origem_destino(request):
    
 def distancia_origem_destino(origin, destination):
     try:
-        api_key = 'AIzaSyB6Zv-Pr_P6tm4ysw2B9OiOeEL8doYRRIk'
+        api_key = key
 
         base_url = 'https://maps.googleapis.com/maps/api/distancematrix/json'
         params = {
