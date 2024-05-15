@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Eventos{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <link href="{% static '/geral/css/custom-fonts.css' %}" rel="stylesheet">
+    <link href="{% static '/geral/css/base.css' %}" rel="stylesheet" />
+    <link rel="shortcut icon" href="{%  static '/geral/calend.ico' %}">
+
+</head>
+<body>
+    <div class="page">
+        <div class="description-container">
+            <span class="page-description">{% block page %}Eventos{% endblock %}</span>
+        </div>
+        <div class="page-menu">
+              <a href="/eventos/listar_eventos/" class="menu__link">
+                <i class="fa-solid fa-calendar-check"></i>
+                Eventos
+              </a>
+              <a href="/eventos/compartilhar/" class="menu__link">
+                <i class="fa-solid fa-square-share-nodes"></i>
+                Compartilhar
+              </a>
+              <a href="/eventos/artistas_list/" class="menu__link">
+                <i class="fa-solid fa-clipboard-user"></i>
+                Artista
+              </a>
+        </div>
+        <div class="dropdown">
+            <a class="menu__link" id="userMenu">
+                <i class="fa fa-user" style="padding: 4px 10px;"></i> 
+                Olá, {{ user.first_name }} 
+            </a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="/admin/">
+                    <i class="fa-solid fa-user-tie"></i>Administrador
+                </a>
+                <a class="dropdown-item" href="/usuarios/cadastro_usuario/">
+                    <i class="fa-solid fa-user-plus"></i>Cadastrar usuário
+                </a>
+                <a class="dropdown-item" href="/usuarios/lista_usuario/">
+                    <i class="fa-solid fa-user-gear"></i>Gerenciar Usuários
+                </a>
+                <hr class="custom-divider"> 
+                <a class="dropdown-item" href="{% url 'logout' %}">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>Sair
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="content" >
+        {% block content %}
+        
+        {% endblock %}
+    </div>
+</body>
+</html>

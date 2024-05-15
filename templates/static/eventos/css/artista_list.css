@@ -1,0 +1,161 @@
+@import url(../../geral/css/estilos_gerais.css);
+
+* {
+    font-family: var(--fonte-geral);
+}
+
+.tabelas {
+    display: flex;
+    margin-top: 5%;
+    justify-content: center;
+}
+
+.table-estilo{
+    padding: 20px 0px;
+    margin-inline: 10px;
+    min-width: 55%;
+    background-color: var(--cor-branco);
+    border-radius: 15px;
+    border-color: var(--borda-input);
+    box-shadow: 2px 3px 5px 1px rgba(109, 109, 109, 0.1);
+}
+
+.table-header{
+    display: flex;
+    padding-inline: 20px;
+    height: 50px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-container {
+    display: flex;
+    position: relative;
+    margin: 10px;
+    justify-content: center;
+    overflow-x: visible;
+    overflow-y: auto;
+}
+
+.table-artista {
+    cursor: cell;
+}
+
+.table-artista thead {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.table-artista th {
+    border: 1px solid var(--borda-vertical);
+    text-align: center;
+    min-width: 150px;
+    max-width: 200px;
+    padding: 5px 10px;
+    font-weight: 100;
+}
+
+.table-artista td {
+    padding: 5px 10px;
+    color: var(--cor-fonte);
+    background-color: white;
+    border: 1px solid var(--borda-vertical);
+    border-bottom: 1px solid var(--borda-bottom);
+    max-width: 200px;
+}
+
+.title {
+    background-color: var(--fundo-tabela-th);
+    white-space: nowrap;
+    color: white;
+    text-align: center;
+    cursor: cell;
+}
+
+.btn {
+    display: inline-block;
+    text-align: center;
+    background-color: var(--botoes-pedidos);
+    color: var(--cor-escrita-botao);
+    border: none;
+    height: 30px;
+    width: auto;
+    padding: 5px 10px;
+    margin: auto 5px;
+    font-size: medium;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.3s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+    color: var(--cor-escrita-botao);
+    background-color: var(--botoes-pedidos-hover);
+    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3);
+}
+
+.btn i {
+    margin-inline: 5px;
+}
+
+input {
+    padding: 8px;
+    font-size: large;
+    border: 1px solid #eee;
+    border-bottom: 2px solid var(--borda-input);
+    outline: none;
+    border-radius: 5px;
+    width: 180px;
+    height: 35px;
+}
+
+input:focus {
+    outline: none;
+    border-bottom-color: var(--input-selecionado);
+}
+
+button {
+    background-color: var(--cor-branco);
+    color: var(--botoes-pedidos);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  button:hover {
+    color: var(--botoes-pedidos-hover);
+  }
+  
+  .botao-del-editar {
+    background-color: var(--cor-branco);
+    color: var(--botoes-pedidos);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .botao-del-editar:hover {
+    color: var(--botoes-pedidos-hover);
+  }
+  
+  i {
+    font-size: 20px;
+  }
+
+  .delete-popup {
+    position: absolute;
+    background-color: var(--cor-branco-popup);
+    border: 1px solid var(--borda-popup);
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 10;
+    display: block;
+    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3);
+  }

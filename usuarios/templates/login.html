@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventos</title>
+  {% load static %}
+  <link href="{% static '/usuarios/css/login.css' %}" rel="stylesheet">
+  <link rel="shortcut icon" href="{%  static 'geral/calend.ico' %}">
+</head>
+
+<body>
+  <div class="split-screen">
+      <div>
+      <form action="{% url 'logar' %}" method="post">
+        {% csrf_token %}
+        <div class="login-container">
+          <h1>Bem vindo!</h1>
+          <h4>Faça o login em sua conta para acessar</h4>
+          <div class="login-form">
+            <input type="text" class="dados-input" name="username" placeholder="Usuário" >
+            <input type="password" class="dados-input" name="password" placeholder="Senha">
+            <div>
+              {% if messages %}
+                <ul class="messages">
+                  {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+                  {% endfor %}
+                </ul>
+                <script>
+                  setTimeout(function () {
+                    document.querySelector('.messages').style.display = 'none';
+                  }, 8000);
+                </script>
+              {% endif %}
+            </div>
+          <div class="login-button-container">
+            <button class="login-button">Entrar</button>
+          </div>
+        </div>
+      </form>
+  </div>
+</body>
+
+</html>

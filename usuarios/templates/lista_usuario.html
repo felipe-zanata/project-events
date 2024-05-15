@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static '/usuarios/css/lista_usuario.css' %}" rel="stylesheet">
+    <title>{% block title %}Usuario{% endblock %}</title>
+    <span style="display: none;">{% block page %}Lista de Usuários{% endblock %}</span>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  </head>
+<body>
+    <div class="tabelas">
+    <div class="tabela-estilo">
+        <h4>Usuários cadastrados</h4>
+            <div class="tabela-container">
+                <table class="tabela-user">
+                    <thead>
+                        <tr class="title">
+                            <th style="min-width: 150px;">Usuário</th>
+                            <th style="min-width: 150px;">Nome</th>
+                            <th style="min-width: 150px;">Sobrenome</th>
+                            <th style="min-width: 250px;">Email</th>
+                            <th>Editar</th>
+                            <th>Deletar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.first_name }}</td>
+                                <td>{{ user.last_name }}</td>
+                                <td>{{  user.email }}</td>
+
+                                <td>
+                                    <a href="/admin/auth/user/{{ user.pk }}/change" class="botao-del-editar"><i class="fa-regular fa-pen-to-square" style="color: --botoes-pedidos;"></i></a>
+                                </td>
+                                <td>
+                                    <button class="btn-icone excluir" data-user-id="{{ user.pk }}">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="delete-confirmation" class="delete-popup" style="display: none; left:45%">
+                <p>Deseja excluir este user?</p>
+                <button id="confirm-delete" class="btn excluir-confirmar" data-user-id="{{ user.pk }}">
+                    Sim, excluir
+                </button>
+                <button class="btn-inverse" id="cancel-delete">Cancelar</button>
+            </div>
+    </div>
+<script>
+    var currentButton = null;
+    document.querySelectorAll('.excluir').forEach(button => {
+        button.addEventListener('click', function() {
+            if (currentButton !== this) {
+                currentButton = this;
+                var popup = document.getElementById('delete-confirmation');
+                var rect = this.getBoundingClientRect();
+                
+                var deslocamentoX = 20;
+                var deslocamentoY = 0;
+    
+                var newLeft = rect.left + window.scrollX + rect.width + deslocamentoX;
+                var newTop = rect.top + window.scrollY + deslocamentoY;
+    
+                popup.style.left = newLeft + 'px';
+                popup.style.top = newTop + 'px';
+                document.querySelector('.excluir-confirmar').setAttribute('data-user-id', this.getAttribute('data-user-id'));
+            }
+            
+            document.getElementById('delete-confirmation').style.display = 'block';
+        });
+    });
+
+    document.getElementById('cancel-delete').addEventListener('click', function() {
+        document.getElementById('delete-confirmation').style.display = 'none';
+        currentButton = null;
+    });
+</script>
+
+<script>
+        function user_delete(userId) {
+        $.ajax({
+        type: 'POST',
+        url: '/usuarios/lista_usuario/',
+        data: {
+            'user_id': userId,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        traditional: true, 
+        success: function(response) {
+            console.log(response);
+            location.reload();
+        },
+        error: function (xhr, status, error) {
+            console.error('Erro ao excluir usuário:', error);
+        }
+        });
+    }
+
+    $(document).ready(function() {
+    $('#confirm-delete').on('click', function () {
+        var userIdToDelete = $(this).attr('data-user-id');
+        user_delete(userIdToDelete);
+        $('#delete-confirmation').hide();
+    });
+});
+</script>
+
+</body>
+{% endblock content %}

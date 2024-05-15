@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="{% static 'eventos/css/evento_detalhe.css' %}" rel="stylesheet" />
+  <title>{% block title %}Eventos{% endblock %}</title>
+  <span style="display: none;">{% block page %}Detalhes do Evento{% endblock %}</span>
+</head>
+
+<body>
+  <div class="tables">
+    <div class="resultado-grid" id="evento_edit">
+      <div class="resultado-card">
+        <div style="display: flex; justify-content: space-between;">
+          <div class="container-field">
+            <h3>Data Evento:</h3>
+            <input type="date" name="data_evento" placeholder="data_evento" title="data_evento" value="{{ object.data_evento|date:'Y-m-d'}}" style="width: 150px;">
+          </div>
+          <a href="{% if source_page %}{% url source_page %}{% else %}{% url 'listar_eventos' %}{% endif %}"
+            class="btn">Voltar</a>
+        </div>
+        <hr class="custom-divider">
+        <div class="container-field" >
+          <input type="text" name="pk" style="display: none" value="{{ object.pk }}">
+            Artista
+            <select name="artista" id="" style="width: 190px;">
+              {% for artista in artistas %}
+              <option value="{{artista.pk}}" {% if artista.pk == object.artista_id %}selected{% endif %}>{{artista.nome_social}}</option>
+              {% endfor %}
+            </select>
+            Status
+            <select name="status" style="width: 180px;">
+              {% for tipo in status %}
+              <option value="{{ tipo.pk }}" {% if tipo.pk == object.status_id %}selected{% endif %}>{{tipo.descricao}}</option>
+              {% endfor %}
+            </select>
+        </div>
+        <div class="container-field">
+          Valor Show
+          <input type="text" name="valor_show" placeholder="valor_show" title="valor_show" value="{{ object.valor_show}}" style="width: 350px;">
+        </div>
+        <div class="container-field">
+          Estado:
+          <select name="estado" id="id_estado" style="width: 180px;">
+            {% for estado in estados %}
+            <option value="{{estado.id}}" {% if estado.id == object.estado_id %}selected{% endif %}>{{estado.estado}}</option>
+            {% endfor %}
+          </select>
+          Cidade:
+          <select name="cidade" id="id_cidade" style="width: 178px;">
+            <option value="{{object.cidade}}">{{object.cidade}}</option>
+          </select>
+
+          <strong style="display:none">UF:</strong>
+          <input style="display:none" id="id_uf" type="text" name="uf" placeholder="uf" title="uf"
+            value="{{ object.uf }}" style="width: 50px;">
+        </div>
+        <div class="container-field">
+          Comissão:
+          <input type="text" name="comissao" placeholder="Comissao" title="comissao" value="{{ object.comissao|default:'' }}" style="width: 162px;">
+          Produção:
+          <input type="text" name="producao" placeholder="Producao" title="producao" value="{{ object.producao|default:'' }}" style="width: 157px;">
+        </div>
+
+        <div class="container-field">
+          Vendedor:
+          <input type="text" name="nome_vendedor" placeholder="Vendedor" title="Vendedor"
+            value="{{ object.nome_vendedor|default:"" }}" style="width: 356px">
+        </div>
+        <div class="container-field">
+          Pendência:
+          <textarea type="text" name="obs" placeholder="Pendência" title="Pendência"
+            style="width: 350px">{{ object.obs }}</textarea>
+        </div>
+        <div class="container-field">
+          Anotações:
+          <textarea type="text" name="anotacoes" placeholder="Anotações" title="Anotações"
+            style="width: 350px">{{ object.anotacoes }}</textarea>
+        </div>
+        <div class="container-field">
+
+        </div>
+        <div>
+          <h3>Contrato</h3>
+          <hr class="custom-divider">
+          <div class="contato-container">
+            <div class="card-header">
+              Data Enviado
+              <input type="date" name="data_enviado" placeholder="Data Enviado" title="Data"
+                value="{{ object.data_enviado|date:'Y-m-d' }}" style="width: 200px;">
+            </div>
+            <div class="card-header">
+              Data Assinado
+              <input type="date" name="data_assinado" placeholder="Data Assinado" title="Data"
+                value="{{ object.data_assinado|date:'Y-m-d' }}" style="width: 200px;">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="resultado-grid" id="evento_edit">
+      <div>
+        <h3>Compartilhar</h3>
+        <hr class="custom-divider">
+        <h4>Contato</h4>
+        <div class="contato-container">
+          <div class="card-share">
+            Nome/Telefone:
+            <input type="text" name="contato_nome_tel" placeholder="Nome/telefone" title="nome_telefone"
+              value="{{object.contato_nome_tel|default:""}}" style="width: 350px;">
+          </div>
+        </div>
+        <h4>Diária</h4>
+        <div class="contato-container">
+          <div class="card-share">
+            Sim/Não:
+            <select name="diaria" style="width: auto;">
+              {% for tipo, descricao in status_diaria %}
+              <option value="{{tipo}}" {% if tipo == object.diaria %}selected{% endif %}>{{descricao}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="card-share">
+            Valor:
+            <input type="text" name="valor_diaria" placeholder="Valor diária" title="valor"
+              value="{{object.valor_diaria|default:''}}" style="width: 200px;">
+          </div>
+        </div>
+        <h4>Produção Local</h4>
+        <div class="contato-container">
+          <div class="card-share">
+            Custos:
+            <input type="text" name="custos" placeholder="Custos" title="custos" value="{{object.custos|default:''}}"
+              style="width: 165px;">
+          </div>
+          <div class="card-share">
+            Operacional:
+            <input type="text" name="operacional" placeholder="Operacional" title="operacional"
+              value="{{object.operacional|default:''}}" style="width: 180px;">
+          </div>
+        </div>
+      </div>
+      <h3>Pagamento</h3>
+      <hr class="custom-divider">
+      <div class="container-field" style="padding: 0; margin: 0 auto;">
+        <form action="{% url 'evento_detalhe' pk=object.pk %}" method="POST" onsubmit="return validarForm()"
+          style="display: flex;">
+          {% csrf_token %}
+          <input type="hidden" name="pgto_id" value="{{ pagamento.id }}" />
+
+          <div style="display: flex; flex-direction: column;">
+            <label for="{{ form1.semana.id_for_label }}" style="margin-left: 10px;">Parcela</label>
+            <input type="text" id="form1.semana" name="semana" style="width: 100px;" class="obrigatorio">
+          </div>
+
+          <div style="display: flex; flex-direction: column;">
+            <label for="{{ form1.data_pagamento.id_for_label }}" style="margin-left: 10px;">{{ form1.data_pagamento.label }}</label>
+            <input type="date" id="form1.data_pagamento" name="data_pagamento" class="obrigatorio">
+          </div>
+
+          <div style="display: flex; flex-direction: column;">
+            <label for="{{ form1.valor.id_for_label }}" style="margin-left: 10px;">{{ form1.valor.label }}</label>
+            <input type="text" id="form1.valor" name="valor" class="obrigatorio">
+          </div>
+          <div style="display: none; flex-direction: column;">
+            <label for="{{ form1.pagamento_status.id_for_label }}" style="margin-left: 10px;">{{ form1.pagamento_status.label }}</label>
+            <input type="text" id="form1.pagamento_status" name="pagamento_status" value="2" class="obrigatorio">
+          </div>
+
+          <button class="btn" type="submit" style="height: auto; font-size: 11px;">
+            <i class="fa-solid fa-money-check-dollar"></i>Novo<br> pagamento
+          </button>
+        </form>
+
+      </div>
+
+      <div class="table-container">
+        <table class="table-pagamentos" id="table-distance">
+          <thead>
+            <tr class="title">
+              <th>Parcela</th>
+              <th>Data</th>
+              <th>Valor</th>
+              <th style="min-width: 50px;">Status</th>
+              <th style="min-width: 50px;"></th>
+              <th style="min-width: 50px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if pagamentos %}
+            {% for pagamento in pagamentos %}
+            <tr>
+              <td style="text-align: center;">{{pagamento.semana}}</td>
+              <td style="text-align: center;">{{pagamento.data_pagamento|date:'d-m-Y'}}</td>
+              <td style="text-align: center;">{{pagamento.valor}}</td>
+              <td style="text-align: center; padding: 0">
+                <select name="pagamento_status" id="pagamento_status_{{pagamento.id}}" 
+                        data-pagamento-id="{{pagamento.id}}" 
+                        class="{% if pagamento.pagamento_status == '1' %}ok{% elif pagamento.pagamento_status == '2' %}notok{% endif %}" 
+                        style="min-width: 30px; font-size: 12px;">
+                  <option value="1" {% if pagamento.pagamento_status == "1"%}selected{% endif %}>OK</option>
+                  <option value="2" {% if pagamento.pagamento_status == "2"%}selected{% endif %}>NÃO OK</option>
+                </select>
+              </td>
+              <td style="padding: 2px 0; text-align: center;">
+                <button class="btn-icone excluir" data-pagamento-id="{{ pagamento.pk }}" style="padding: 5px;">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </td>
+              <td style="padding: 2px 0; text-align: center;">
+                <button class="btn-icone editar" data-pagamento-id="{{ pagamento.pk }}" style="padding: 5px;">
+                  <i class="fa-solid fa-pencil"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="6">Sem pagamentos</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="delete-confirmation" class="delete-popup" style="display: none; left:45%">
+      <p>Deseja excluir este pagamento?</p>
+      <button id="confirm-delete" class="btn excluir-confirmar" data-artista-id="{{ pagamento.pk }}">
+        Sim, excluir
+      </button>
+      <button class="btn-inverse" id="cancel-delete">Cancelar</button>
+    </div>
+  </div>
+  <div id="snackbar">Mensagem!</div>
+
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    // Adicione um manipulador de evento para o clique no botão de editar
+    $('.editar').on('click', function () {
+      // Encontre a linha da tabela correspondente
+      var tr = $(this).closest('tr');
+      // Extrair os dados da linha
+      var semana = tr.find('td:eq(0)').text().trim();
+      var data = tr.find('td:eq(1)').text().trim();
+       // Remova qualquer caractere não mérico do valor e substitua a vírgula pelo ponto
+      //  var valor = tr.find('td:eq(2)').text().replace('.', '').replace(',', '.');
+      var valor = tr.find('td:eq(2)').text().trim();
+      var status = tr.find('td:eq(3) select').val();
+      console.log(valor)
+
+      // Formate a data no formato "yyyy-MM-dd"
+      var dataFormatted = data.split('-').reverse().join('-');
+      // Preencher os campos do formulário com os dados extraídos
+      $('#form1\\.semana').val(semana);
+      $('#form1\\.data_pagamento').val(dataFormatted);
+      $('#form1\\.valor').val(valor);
+      $('#form1\\.pagamento_status').val(status);
+
+      // Adicione o ID do pagamento ao campo oculto (se necessário)
+      var pagamentoId = $(this).data('pagamento-id');
+      $('input[name="pgto_id"]').val(pagamentoId);
+    });
+  });
+</script>
+
+  <script>
+    $(document).ready(function () {
+      $('#evento_edit  input[type="text"], #evento_edit textarea[type="text"], #evento_edit input[type="date"]').on('focus', function () {
+        var valorInicialCampo = $(this).val();
+        // console.log('Campo focado. Valor atual:', valorInicialCampo);
+        $(this).data('valor-inicial', valorInicialCampo);
+
+      }).on('blur keypress', function () {
+        if (event.which === 13 || event.type === 'blur') {
+          var valorAtualCampo = $(this).val();
+          var idEvento = $('#evento_edit input[name="pk"]').val();
+          var nomeColuna = $(this).attr('name');
+          var valorInicialCampo = $(this).data('valor-inicial').trim();
+
+          if (nomeColuna === 'semana' || nomeColuna === 'data_pagamento') {
+            console.log('Pagamento')
+          }
+          else if (valorAtualCampo !== valorInicialCampo) {
+
+            enviarAtualizacao(idEvento, valorAtualCampo, nomeColuna);
+          };
+        }
+      });
+    });
+
+    $('#evento_edit  select').on('change', function () {
+
+      var idEvento = $('#evento_edit input[name="pk"]').val();
+      var cidade = $('#evento_edit select[name="cidade"]').val();
+      var estado = $('#evento_edit select[name="estado"]').val();
+      var uf = $('#evento_edit input[name="uf"]').val();
+      var valorAtualCampo = $(this).val();
+      var nomeColuna = $(this).attr('name');
+      var localidade = [cidade, uf, estado];
+
+      if(nomeColuna == 'pagamento_status'){
+        idEvento = $(this).attr('data-pagamento-id');
+        var tr = $(this).closest('tr select');
+
+        // Adicione a classe com base na condição desejada
+        if (valorAtualCampo == 2) {
+          console.log(2)
+          tr.removeClass('ok');
+          tr.addClass('notok');
+        }else{
+          console.log(1)
+          tr.removeClass('notok');
+          tr.addClass('ok');
+        }
+      }
+
+      console.log('Id:', idEvento);
+      console.log('Valor atual:', valorAtualCampo);
+      console.log('cidade:', cidade);
+      console.log('localidade:', localidade);
+
+      enviarAtualizacao(idEvento, valorAtualCampo, nomeColuna, localidade);
+
+    });
+  </script>
+  <script>
+
+    function showSnackbar(message, type) {
+      snackbar.innerText = message;
+      snackbar.classList.add('show');
+      snackbar.classList.add(type);
+
+      setTimeout(function () {
+        snackbar.classList.remove('show');
+        snackbar.classList.add(type);
+        snackbar.classList.remove('success', 'error');
+      }, 3000);
+    }
+    function enviarAtualizacao(idEvento, valorAtualCampo, nomeColuna, valores = []) {
+
+      if (nomeColuna == "valor") {
+        novoValor = novoValor.replace(/,/g, '.')
+      }
+
+      $.ajax({
+        type: 'POST',
+        url: '/eventos/atualizar_evento/',
+        data: {
+          'pk': idEvento,
+          'novo_valor': valorAtualCampo,
+          'nomeColuna': nomeColuna,
+          'lista_valores[]': valores,
+          'csrfmiddlewaretoken': '{{ csrf_token }}',
+        },
+        success: function (response) {
+          showSnackbar(response.message, 'success');
+          console.log(response);
+        },
+        error: function (xhr, status, error) {
+          var response = xhr.responseJSON;
+          if (response && response.error) {
+            console.log('erro')
+            showSnackbar(response.error, 'error');
+          } else {
+            showSnackbar('Erro desconhecido: ' + error, 'error');
+            console.log('erro')
+          }
+          console.error(xhr, status, error);
+        }
+      });
+    }
+  </script>
+  <script>
+    $(document).ready(function () {
+      $("#id_estado").change(function () {
+        var estado_id = $(this).val();
+        $.getJSON(
+          "/obter_uf_cidades/",
+          { estado_id: estado_id },
+          function (data) {
+            $("#id_uf").html(
+              data.ufs
+                .map((uf) => `<option value="${uf}">${uf}</option>`)
+                .join("")
+            );
+
+            // Atualize o valor do campo uf no formulário
+            var novoValorUf = data.ufs[0];
+            $("#id_uf").val(novoValorUf).change(); // Assumindo que o primeiro valor é o desejado
+            console.log("Novo valor para #id_uf:", novoValorUf);
+
+            $("#id_cidade").html(
+              data.cidades
+                .map((cidade) => `<option value="${cidade}">${cidade}</option>`)
+                .join("")
+            );
+          }
+        );
+      });
+    });
+  </script>
+
+  <script>
+    var currentButton = null;
+    document.querySelectorAll('.excluir').forEach(button => {
+      button.addEventListener('click', function () {
+
+        if (currentButton !== this) {
+          currentButton = this;
+          var popup = document.getElementById('delete-confirmation');
+          var rect = this.getBoundingClientRect();
+
+          var deslocamentoX = 20;
+          var deslocamentoY = 0;
+
+          var newLeft = rect.left + window.scrollX + rect.width + deslocamentoX;
+          var newTop = rect.top + window.scrollY + deslocamentoY;
+
+          popup.style.left = newLeft + 'px';
+          popup.style.top = newTop + 'px';
+          document.querySelector('.excluir-confirmar').setAttribute('data-pagamento-id', this.getAttribute('data-pagamento-id'));
+        }
+
+        document.getElementById('delete-confirmation').style.display = 'block';
+      });
+    });
+
+    document.getElementById('cancel-delete').addEventListener('click', function () {
+      document.getElementById('delete-confirmation').style.display = 'none';
+      currentButton = null;
+    });
+  </script>
+
+  <script>
+    function pagamento_delete(pagamentoId) {
+      $.ajax({
+        type: 'POST',
+        url: '/eventos/remover_pagamento/',
+        data: {
+          'pagamento_id': pagamentoId,
+          'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        traditional: true,
+        success: function (response) {
+          console.log(response);
+          location.reload();
+        },
+        error: function (xhr, status, error) {
+          console.error('Erro ao excluir pagamento:', error);
+        }
+      });
+    }
+
+    $(document).ready(function () {
+      $('#confirm-delete').on('click', function () {
+        var pagamentoIdToDelete = $(this).attr('data-pagamento-id');
+        pagamento_delete(pagamentoIdToDelete);
+        $('#delete-confirmation').hide();
+      });
+    });
+  </script>
+
+  <script>
+    function validarForm() {
+      const camposObrigatorios = document.querySelectorAll('.obrigatorio');
+      var valorInput = document.getElementById('form1.valor');
+      
+      valorInput.value = valorInput.value.replace(/\./g, '').replace(/,/g, '.');
+
+      for (let i = 0; i < camposObrigatorios.length; i++) {
+        if (camposObrigatorios[i].value === '') {
+          alert('Por favor, preencha todos os campos de pagamento.');
+          return false;
+        }
+      }
+      return true;
+    };
+  </script>
+</body>
+{% endblock content %}

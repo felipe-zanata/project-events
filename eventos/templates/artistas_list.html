@@ -1,0 +1,147 @@
+{% extends "base.html" %} 
+{% block content %}
+{% load static %} 
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="{% static 'eventos/css/artista_list.css' %}" rel="stylesheet" />
+  <title>{% block title %}Artistas{% endblock %}</title>
+  <span style="display: none;">{% block page %}Lista de Artistas{% endblock %}</span>
+
+</head>
+<body>
+  <div class="tabelas">
+      <div>
+          {% if messages %}
+          <br />
+          {% for message in messages %}
+          <section class="alert {{message.tags}}">{{message}}</section>
+          {% endfor %} 
+          {% endif %}
+      </div>
+      <div class="table-estilo">
+        <div class="table-header">
+
+          <div style="display: flex; justify-content: center; width: 100%;">
+            <form method="post" href="{% if artista.pk %}{% url 'alterar_artista' id=artista.pk %}{% else %}{% url 'adicionar_artista' %}{% endif %}">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Erro no formulário:</strong>
+                        <ul>
+                            {% for error in form.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {{ form.as_table }}
+                <input type="submit" class="btn" value="Salvar"/>
+            </form>
+          </div>
+        </div>
+      <div class="tables">
+        <div class="table-container">
+          <table class="table-artista">
+            <thead>
+              <tr class="title">
+                <th>Nome Artista</th>
+                <th>Nome Social</th>
+                <th>Telefone</th>
+                <th>Editar</th>
+                <th>Deletar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for artista in artistas %}
+              <tr>
+                <td>{{ artista.nome_artista }}</td>
+                <td>{{ artista.nome_social }}</td>
+                <td>{{ artista.telefone }}</td>
+                <td style="text-align: center;">
+                    <a href="{% url "alterar_artista" artista.pk %}" class="botao-del-editar"><i class="fa-regular fa-pen-to-square" style="color: --botoes-pedidos;"></i></a>
+                </td>
+                <td style="text-align: center;">
+                  <button class="btn-icone excluir" data-artista-id="{{ artista.pk }}">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="delete-confirmation" class="delete-popup" style="display: none; left:45%">
+    <p>Deseja excluir este artista?</p>
+    <button id="confirm-delete" class="btn excluir-confirmar" data-artista-id="{{ artista.pk }}">
+        Sim, excluir
+    </button>
+    <button class="btn-inverse" id="cancel-delete">Cancelar</button>
+  </div>
+</div>
+
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+  <script>
+      var currentButton = null;
+      document.querySelectorAll('.excluir').forEach(button => {
+          button.addEventListener('click', function() {
+              if (currentButton !== this) {
+                  currentButton = this;
+                  var popup = document.getElementById('delete-confirmation');
+                  var rect = this.getBoundingClientRect();
+                  
+                  var deslocamentoX = 20;
+                  var deslocamentoY = 0;
+      
+                  var newLeft = rect.left + window.scrollX + rect.width + deslocamentoX;
+                  var newTop = rect.top + window.scrollY + deslocamentoY;
+      
+                  popup.style.left = newLeft + 'px';
+                  popup.style.top = newTop + 'px';
+                  document.querySelector('.excluir-confirmar').setAttribute('data-artista-id', this.getAttribute('data-artista-id'));
+              }
+              
+              document.getElementById('delete-confirmation').style.display = 'block';
+          });
+      });
+
+      document.getElementById('cancel-delete').addEventListener('click', function() {
+          document.getElementById('delete-confirmation').style.display = 'none';
+          currentButton = null;
+      });
+  </script>
+
+  <script>
+        function artista_delete(artistaId) {
+          $.ajax({
+          type: 'POST',
+          url: '/eventos/deletar_artista/',
+          data: {
+              'artista_id': artistaId,
+              'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          traditional: true, 
+          success: function(response) {
+              console.log(response);
+              location.reload();
+          },
+          error: function (xhr, status, error) {
+              console.error('Erro ao excluir artista:', error);
+          }
+          });
+      }
+
+      $(document).ready(function() {
+      $('#confirm-delete').on('click', function () {
+          var artistaIdToDelete = $(this).attr('data-artista-id');
+          artista_delete(artistaIdToDelete);
+          $('#delete-confirmation').hide();
+      });
+  });
+</script>
+</body>
+
+{% endblock content %}

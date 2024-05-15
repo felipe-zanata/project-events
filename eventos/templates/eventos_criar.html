@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="{% static 'eventos/css/evento_criar.css' %}" rel="stylesheet" />
+  <title>{% block title %}Eventos{% endblock %}</title>
+  <span style="display: none;">{% block page %}Lista de Eventos{% endblock %}</span>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+</head>
+
+<body>
+
+  <div class="tables">
+    <div class="resultado-grid" id="evento_edit">
+    <div class="resultado-card">
+      <h4>Criar Evento</h4>
+      <form method="post" action="{% url 'eventos_criar' %}" onsubmit="return validarFormulario()">
+        {% csrf_token %} 
+          <div class="container-field">
+            <h3>Evento</h3>
+          </div>
+          <hr class="custom-divider">
+          <div class="container-field">
+             Data Evento:
+            <input type="date" id="data_evento" name="data_evento" placeholder="data_evento" title="data_evento" class="obrigatorio" style="width: 150px;">
+          </div>
+          <div class="container-field" >
+              Artista:
+              <select name="artista" id="artista" style="width: 190px;">
+                {% for artista in form.fields.artista.queryset %}
+                <option value="{{artista.id}}">{{artista}}</option>
+                {% endfor %}
+              </select>
+              Status:
+              <select name="status" style="width: 180px;">
+                {% for status in form.fields.status.queryset %}
+                <option value="{{ status.id }}">{{status}}</option>
+                {% endfor %}
+              </select>
+          </div>
+          <div class="container-field">
+            Valor Show:
+            <input type="text" name="valor_show" placeholder="valor_show" title="valor_show" class="obrigatorio" style="width: 350px;">
+          </div>
+          <div class="container-field">
+            Estado:
+            <select name="estado" id="id_estado" style="width: 180px;">
+              {% for estado in form.fields.estado.queryset %}
+              <option value="{{estado.id}}">{{estado.estado}}</option>
+              {% endfor %}
+            </select>
+            Cidade:
+            <select name="cidade" id="id_cidade" style="width: 178px;" class="obrigatorio">
+              <option value="{{object.cidade}}">{{object.cidade}}</option>
+            </select>
+            <select name="uf" id="id_uf" style="width: 50px; display: none;">
+              <option value="{{object.uf}}">{{object.uf}}</option>
+            </select>
+          </div>
+          <div class="container-field">
+            Comissão:
+            <input type="text" name="comissao" placeholder="comissao" title="comissao" style="width: 162px;">
+            Produção:
+            <input type="text" name="producao" placeholder="producao" title="producao" style="width: 157px;">
+          </div>
+  
+          <div class="container-field">
+            Vendedor:
+            <input type="text" name="nome_vendedor" placeholder="Vendedor" title="Vendedor" style="width: 356px">
+          </div>
+          <div class="container-field">
+            Pendência:
+            <textarea type="text" name="obs" placeholder="Pendência" title="Pendência" ></textarea>
+          </div>
+          <div>
+            <h3>Contrato</h3>
+            <hr class="custom-divider">
+            <div class="contato-container">
+              <div class="card-header">
+                Data Enviado
+                <input type="date" name="data_enviado" placeholder="Data Enviado" title="Data" style="width: 200px;">
+              </div>
+              <div class="card-header">
+                Data Assinado
+                <input type="date" name="data_assinado" placeholder="Data Assinado" title="Data" style="width: 200px;">
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>Compartilhar</h3>
+            <hr class="custom-divider">
+            <h2>Contato</h2>
+            <div class="contato-container">
+              <div class="card-share">
+                Nome/Telefone:
+                <input type="text" name="contato_nome_tel" placeholder="Nome/telefone" title="nome_telefone" style="width: 350px;">
+              </div>
+            </div>
+            <h2>Diária</h2>
+            <div class="contato-container">
+              <div class="card-share">
+                Sim/Não:
+                <select name="diaria" style="width: auto;">
+                    <option value="S">Sim</option>
+                    <option value="N">Não</option>
+                </select>
+              </div>
+              <div class="card-share">
+                Valor:
+                <input type="text" name="valor_diaria" placeholder="Valor diária" title="valor" style="width: 200px;">
+              </div>
+            </div>
+            <h2>Produção Local</h2>
+            <div class="contato-container">
+              <div class="card-share">
+                Custos:
+                <input type="text" name="custos" placeholder="Custos" title="custos" style="width: 165px;">
+              </div>
+              <div class="card-share">
+                Operacional:
+                <input type="text" name="operacional" placeholder="Operacional" title="operacional" style="width: 180px;">
+              </div>
+            </div>
+          </div>
+          <div style="position: absolute; top: 94%; display: flex; justify-content: space-evenly; width: 500px; ">
+            <button type="submit" class="btn">Salvar</button>
+            <a href="{% url 'listar_eventos' %}" class="btn-inverse">Voltar</a>
+          </div>
+        </form>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      $("#id_estado").change(function () {
+        var estado_id = $(this).val();
+        $.getJSON(
+          "/obter_uf_cidades/",
+          { estado_id: estado_id },
+          function (data) {
+            $("#id_uf").html(
+              data.ufs
+                .map((uf) => `<option value="${uf}">${uf}</option>`)
+                .join("")
+            );
+
+            var novoValorUf = data.ufs[0];
+            $("#id_uf").val(novoValorUf).change();
+            console.log("Novo valor para #id_uf:", novoValorUf);
+
+            $("#id_cidade").html(
+              data.cidades
+                .map((cidade) => `<option value="${cidade}">${cidade}</option>`)
+                .join("")
+            );
+          }
+        );
+      });
+    });
+  </script>
+  <script>
+    $(document).ready(function () {
+      $("#id_estado").change(function () {
+        var estado_id = $(this).val();
+        $.getJSON(
+          "/obter_uf_cidades/",
+          { estado_id: estado_id },
+          function (data) {
+            var novoSelectCidade = $("<select>", {
+              id: "id_cidade",
+              name: "cidade",
+            });
+
+            novoSelectCidade.html(
+              data.cidades
+                .map((cidade) => `<option value="${cidade}">${cidade}</option>`)
+                .join("")
+            );
+
+            $("#id_cidade").replaceWith(novoSelectCidade);
+
+            var novoValorCidade = data.cidades[0];
+            $("#id_cidade").val(novoValorCidade).change(); 
+            console.log("Novo valor para #id_cidade:", novoValorCidade);
+          }
+        );
+      });
+    });
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const campos = document.querySelectorAll('.obrigatorio');
+
+    campos.forEach(function(campo) {
+      campo.addEventListener('blur', function() {
+        if (this.value.trim() === '') {
+          this.classList.add('error');
+        } else {
+          this.classList.remove('error');
+        }
+      });
+    });
+  });
+
+  function validarFormulario() {
+    const camposObrigatorios = document.querySelectorAll('.obrigatorio');
+
+    for (let i = 0; i < camposObrigatorios.length; i++) {
+        if (camposObrigatorios[i].value === '') {
+            camposObrigatorios[i].classList.add('error');
+            alert('Por favor, preencha todos os campos obrigatórios.');
+            return false;
+        } else {
+          camposObrigatorios[i].classList.remove('error');
+        };
+    }
+    return true;
+  }
+
+</script>
+</body>
+
+
+{% endblock %}

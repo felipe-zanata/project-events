@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'eventos/css/evento_lista.css' %}" rel="stylesheet" />
+    <title>{% block title %}Eventos{% endblock %}</title>
+    <span style="display: none;">{% block page %}Lista de Eventos{% endblock %}</span>
+</head>
+
+<body>
+    <div class="tables">
+            <div class="table-estilo">
+                <div class="table-header">
+                    <form action="{% url "listar_eventos" %}" method="get" style="width: 100%;">
+                        {% csrf_token %}
+                        <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                            <div style="display: flex;">
+                                <div class="artista">Selecionar Artista:</div>
+                                <div class="filtro-section">
+                                    <select name="Artista" id="" placeholder="Artista" style="background-color: #eeeeee9d;">
+                                        <option value=""></option>
+                                        {% for artista in artistas %}
+                                        <option value="{{artista}}" {% if request.GET.Artista == artista %}selected{% endif %}>
+                                            {{artista}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="filtro-section">
+                                    <input id="multiSelectLabelAno" type="text" name="Ano" placeholder="Ano"
+                                        title="Ano" autocomplete="off" value="{{ request.GET.Ano }}" style="width: 120px;">
+                                    <div id="multiSelectContainerAno" class="multiSelectContainer" style="display: none; width: 120px;">
+                                        <select id="multiSelectAno" class="multiSelect" multiple style="min-width: 120px;">
+                                            {% for ano in anos %}
+                                            <option value="{{ ano|date:"Y" }}">
+                                                {{ ano|date:"Y"|default:"" }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="filterOptions" style="width: 120px;">
+                                            <button type="button" id="allButtonAno" class="btn">Todos</button>
+                                            <button type="button" id="okButtonAno" class="btn-ok">OK</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="filtro-section">
+                                    <input id="multiSelectLabelMes" type="text" name="Mes" placeholder="Mes"
+                                        title="Mes" autocomplete="off" value="{{ request.GET.Mes }}" style="width: 120px;">
+                                    <div id="multiSelectContainerMes" class="multiSelectContainer" style="display: none; width: 120px;">
+                                        <select id="multiSelectMes" class="multiSelect" multiple style="min-width: 120px;">
+                                            {% for mes in meses %}
+                                            <option value="{{ mes.month }}">
+                                                {{ mes|date:"F"|default:"" }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="filterOptions" style="width: 120px;">
+                                            <button type="button" id="allButtonMes" class="btn">Todos</button>
+                                            <button type="button" id="okButtonMes" class="btn-ok">OK</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="{% url 'eventos_criar' %}" class="btn">
+                                <i class="fa-solid fa-calendar-plus"></i>Novo Evento
+                            </a>
+                        </div>
+                        <div class="table-action">
+                            <div class="filtro-section">
+                                <input type="text" name="Cidade" placeholder="Cidade" title="Cidade" value="{{ request.GET.Cidade }}">
+                            </div>
+                            <div class="filtro-section">
+                                <input type="text" name="Vendedor" placeholder="Vendedor" title="Vendedor" value="{{ request.GET.Vendedor }}">
+                            </div>
+                            <div class="filtro-section">
+                                <input id="multiSelectLabelStatus" type="text" name="Status" placeholder="Status"
+                                    title="Status" autocomplete="off" value="{{ request.GET.Status }}">
+                                <div id="multiSelectContainerStatus" class="multiSelectContainer" style="display: none;">
+                                    <select id="multiSelectStatus" class="multiSelect" multiple>
+                                        {% for s_ in status %}
+                                        <option value="{{ s_.id }}">
+                                            {{ s_|default:"" }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="filterOptions">
+                                        <button type="button" id="allButtonStatus" class="btn">Todos</button>
+                                        <button type="button" id="okButtonStatus" class="btn-ok">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filtro-section">
+                                <input id="multiSelectLabelUF" type="text" name="UF" placeholder="UF"
+                                    title="UF" autocomplete="off" value="{{ request.GET.UF }}" style="width: 120px;">
+                                <div id="multiSelectContainerUF" class="multiSelectContainer" style="display: none; width: 120px;">
+                                    <select id="multiSelectUF" class="multiSelect" multiple style="min-width: 120px;">
+                                        {% for uf in ufs %}
+                                        <option value="{{ uf}}">{{ uf}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="filterOptions" style="width: 120px;">
+                                        <button type="button" id="allButtonUF" class="btn">Todos</button>
+                                        <button type="button" id="okButtonUF" class="btn-ok">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <div>
+                                <button type="submit" class="btn">
+                                     <i class="fa fa-filter"></i>Filtrar
+                                </button>
+                                <a href="{% url 'listar_eventos' %}" class="btn-inverse">
+                                     <i class="fa-solid fa-filter-circle-xmark"></i>Limpar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="table-container">
+                    <table class="table-eventos" id="eventTable">
+                        <thead>
+                            <tr class="title">
+                                <th style="min-width: 50px;">Dia</th>
+                                <th>Cidade - UF</th>
+                                <th style="min-width: 200px;">Valor Show</th>
+                                <th>Comissão</th>
+                                <th style="min-width: 150px;">Vendedor</th>
+                                <th>Produção</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if eventos %}
+                            {% for evento in eventos %}
+               
+                            {% if evento.show_month_title %}
+                                <tr class="month-title">
+                                    <td colspan="10">{{ evento.data_evento|date:"F | y" }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <td style="text-align: center;">{{ evento.data_evento|date:"d"|default:"" }}</td>
+                                <td>{{ evento.cidade|default:"" }} - {{ evento.uf|default:"" }}</td>
+                                <td>{{ evento.valor_show|default:"0" }}</td>
+                                <td>{{ evento.comissao|default:"" }}</td>
+                                <td>{{ evento.nome_vendedor|default:"" }}</td>
+                                <td>{{ evento.producao|default:"" }}</td>
+                                <td>
+                                    <div class="evento-status {{evento.status}}">{{ evento.status|default:"" }}</div>
+                                </td>
+                                <td>
+                                    <a href="{% url 'evento_detalhe' evento.pk  %}" class="btn-inverse">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </a>
+                                    <button class="btn-inverse excluir" data-evento-id="{{ evento.pk }}" id="excluir-evento" style="padding: 5px;">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5">Sem eventos disponíveis</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="delete-confirmation" class="delete-popup" style="display: none; left:45%">
+                <p>Deseja excluir este pagamento?</p>
+                <button id="confirm-delete" class="btn excluir-confirmar" data-artista-id="{{ evento.pk }}">
+                    Sim, excluir
+                </button>
+                <button class="btn-inverse" id="cancel-delete">Cancelar</button>
+            </div>
+            <div class="table-estilo">
+                <div class="table-header" style="justify-content: end;">
+                    <form action="{% url "origem_destino" %}" method="post" id="formOrigemDestino" style="margin: 10px; position: relative;">
+                        {% csrf_token %}
+                        <select name="cidade" id="cidade_origem">
+                            {% for cidade in cidades %}
+                            <option value="{{ cidade}}">{{ cidade}}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn" id="pesquisarDestino" type="button">
+                        {% comment %} <button class="btn" onclick="pesquisarOrigemDestino()" type="button"> {% endcomment %}
+                            <i class="fa-solid fa-route"></i>Pesquisar
+                        </button>
+                        <div id="loading-spinner">
+                            <img src="{% static 'eventos/img/spinner.gif' %}" alt="Carregando..." />
+                            <p>Calculando rotas, aguarde...</p>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table class="table-eventos" id="table-distance">
+                        <thead>
+                            <tr class="title">
+                                <th>Cidade Destino</th>
+                                <th style="min-width: 100px;">Km</th>
+                                <th style="min-width: 100px;">Tempo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if locais %}
+                            {% for local in locais %}
+                            <tr>
+                                <td>{{local.destino}}</td>
+                                <td>{{local.km}}</td>
+                                <td>{{local.horas}}</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5">Pesquisar Cidades</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#pesquisarDestino").click(function(){
+                // Obtém os valores dos campos
+
+                $("#loading-spinner").show();
+                var cidade = $("[name='cidade']").val();
+                var uf = $("[name='UF']").val();
+                console.log(uf)
+                var artista = $("[name='Artista']").val();
+                var ano = $("[name='Ano']").val();
+                var mes = $("[name='Mes']").val();
+                var vendedor = $("[name='Vendedor']").val();
+                var status = $("[name='Status']").val();
+                console.log("Valores enviados com sucesso!", cidade);
+                // Envia os valores para a views via AJAX
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'origem_destino' %}",
+                    contentType: 'application/json',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: JSON.stringify({
+                        'cidade': cidade,
+                        'UF': uf,
+                        'artista': artista,
+                        'vendedor': vendedor,
+                        'ano': ano,
+                        'mes': mes,
+                        'status': status,
+                    }),
+                    success: function(data){
+                        // Manipule a resposta do backend aqui, se necessário
+                        console.log(data);
+                        atualizarTabela(data.locais);
+                        $("#loading-spinner").hide();
+                    },
+                    error: function(xhr, status, error) {
+                        // Em caso de erro, imprime detalhes no console
+                        console.error("Erro na requisição AJAX:", status, error);
+
+                        // Oculta o indicador de carregamento em caso de erro
+                        $("#loading-spinner").hide();
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+         $('#excluir-evento').on('click', function () {
+             $('#delete-confirmation').show();
+         });
+    </script>
+    <script>
+        var currentButton = null;
+        document.querySelectorAll('.excluir').forEach(button => {
+        button.addEventListener('click', function () {
+
+            if (currentButton !== this) {
+            currentButton = this;
+            var popup = document.getElementById('delete-confirmation');
+            var rect = this.getBoundingClientRect();
+
+            var deslocamentoX = 20;
+            var deslocamentoY = 0;
+
+            var newLeft = rect.left + window.scrollX + rect.width + deslocamentoX;
+            var newTop = rect.top + window.scrollY + deslocamentoY;
+
+            popup.style.left = newLeft + 'px';
+            popup.style.top = newTop + 'px';
+            document.querySelector('.excluir-confirmar').setAttribute('data-evento-id', this.getAttribute('data-evento-id'));
+            }
+
+            document.getElementById('delete-confirmation').style.display = 'block';
+        });
+        });
+
+        document.getElementById('cancel-delete').addEventListener('click', function () {
+        document.getElementById('delete-confirmation').style.display = 'none';
+        currentButton = null;
+        });
+    </script>
+    <script>
+        function evento_delete(eventoId) {
+        $.ajax({
+            type: 'POST',
+            url: '/eventos/remover_evento/',
+            data: {
+            'evento_id': eventoId,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            traditional: true,
+            success: function (response) {
+            console.log(response);
+            location.reload();
+            },
+            error: function (xhr, status, error) {
+            console.error('Erro ao excluir Evento:', error);
+            }
+        });
+        }
+
+        $(document).ready(function () {
+        $('#confirm-delete').on('click', function () {
+            var eventoIdToDelete = $(this).attr('data-evento-id');
+            evento_delete(eventoIdToDelete);
+            $('#delete-confirmation').hide();
+        });
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function setupMultiSelect(inputId, containerId, allButtonId, okButtonId, emptyButtonId, multiSelectId) {
+                var multiSelectContainer = document.getElementById(containerId);
+                var multiSelectLabel = document.getElementById(inputId);
+                var multiSelect = document.getElementById(multiSelectId);
+                var allButton = document.getElementById(allButtonId);
+                var okButton = document.getElementById(okButtonId);
+                var emptyButton = document.getElementById(emptyButtonId);
+
+                allButton.addEventListener("click", function () {
+                    if (allButton.innerText === "Limpar") {
+                        Array.from(multiSelect.options).forEach(option => (option.selected = false));
+                        allButton.innerText = "Todos";
+                    } else {
+                        Array.from(multiSelect.options).forEach(option => (option.selected = true));
+                        allButton.innerText = "Limpar";
+                    }
+                });
+
+                multiSelectLabel.addEventListener("click", function () {
+                    multiSelectContainer.style.display = "block";
+                });
+
+                okButton.addEventListener("click", function () {
+                    multiSelectContainer.style.display = "none";
+                    multiSelectLabel.value = Array.from(multiSelect.selectedOptions).map(option => option.value).join("; ");
+                });
+
+
+                document.addEventListener("click", function (event) {
+                    if (!multiSelectContainer.contains(event.target) && event.target !== multiSelectLabel) {
+                        multiSelectContainer.style.display = "none";
+                    }
+                });
+            }
+
+            setupMultiSelect('multiSelectLabelStatus', 'multiSelectContainerStatus', 'allButtonStatus', 'okButtonStatus', 'emptyButtonStatus', 'multiSelectStatus');
+            setupMultiSelect('multiSelectLabelAno', 'multiSelectContainerAno', 'allButtonAno', 'okButtonAno', 'emptyButtonAno', 'multiSelectAno');
+            setupMultiSelect('multiSelectLabelMes', 'multiSelectContainerMes', 'allButtonMes', 'okButtonMes', 'emptyButtonMes', 'multiSelectMes');
+            setupMultiSelect('multiSelectLabelUF', 'multiSelectContainerUF', 'allButtonUF', 'okButtonUF', 'emptyButtonUF', 'multiSelectUF');
+        });
+    </script>
+
+    <script>
+
+        function pesquisarOrigemDestino() {
+
+            $("#loading-spinner").show();
+            var form = document.getElementById('formOrigemDestino');
+            var formData = new FormData(form);
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status== 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    console.log(response)
+                    atualizarTabela(response.locais);
+                    $("#loading-spinner").hide();
+                }
+            };
+
+            xhr.open('POST', form.action, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send(formData);
+        }
+
+        function atualizarTabela(locais) {
+            var tableBody = document.getElementById('table-distance').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+
+            if (locais.length > 0) {
+                for (var i = 0; i < locais.length; i++) {
+                    var row = tableBody.insertRow(i);
+                    var cellDestino = row.insertCell(0);
+                    var cellKm = row.insertCell(1);
+                    var cellHoras = row.insertCell(2);
+
+                    cellDestino.innerHTML = locais[i].destino;
+                    cellKm.innerHTML = locais[i].km;
+                    cellHoras.innerHTML = locais[i].horas;
+                }
+            } else {
+                var row = tableBody.insertRow(0);
+                var cellEmpty = row.insertCell(0);
+                cellEmpty.colSpan = 3;
+                cellEmpty.innerHTML = 'Pesquisar Cidades';
+            }
+        }
+    </script>
+
+</body>
+{% endblock content %}

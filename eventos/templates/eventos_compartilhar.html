@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'eventos/css/evento_share.css' %}" rel="stylesheet" />
+    <title>{% block title %}Eventos{% endblock %}</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <span style="display: none;">{% block page %}Compartilhar Eventos{% endblock %}</span>
+</head>
+
+<body>
+    <div class="tables">
+        <div>
+            <div class="table-estilo">
+                <div style="display: flex; justify-content: space-between;">
+                    <div class="artista" style="font-size: 20px;">Selecionar Artista</div>
+                    <div>
+                        <!-- <button class="btn" id="exportar" onclick="exportarParaCSV()"> -->
+                        <button class="btn" id="exportar" style="display: none;">
+                            <i class="fa-solid fa-file-excel"></i>Excel
+                        </button>
+                        <button class="btn" onclick="printAssistanceTable()">
+                            <i class="fa-solid fa-print"></i> PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="table-header">
+                    <form action="{% url "compartilhar_eventos" %}" method="GET">
+                        {% csrf_token %}
+                        <div style="display: flex; justify-content: space-between;">
+                            <div style="display: flex;">
+                                <select name="artista" id="" style="font-size: 15px; height: 35px;">
+                                    <option value="{{evento.artista}}"></option>
+                                    {% for artista in artistas %}
+                                        <option value="{{artista}}" {% if request.GET.artista == artista %}selected{% endif%}> {{artista}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filtro-section">
+                                <input id="multiSelectLabelAno" type="text" name="Ano" placeholder="Ano"
+                                    title="Ano" autocomplete="off" value="{{ request.GET.Ano }}" style="width: 120px;">
+                                <div id="multiSelectContainerAno" class="multiSelectContainer" style="display: none; width: 120px;">
+                                    <select id="multiSelectAno" class="multiSelect" multiple style="min-width: 120px;">
+                                        {% for ano in anos %}
+                                        <option value="{{ ano|date:"Y" }}">
+                                            {{ ano|date:"Y"|default:"" }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="filterOptions" style="width: 120px;">
+                                        <button type="button" id="allButtonAno" class="btn">Todos</button>
+                                        <button type="button" id="okButtonAno" class="btn-ok">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filtro-section">
+                                <input id="multiSelectLabelMes" type="text" name="Mes" placeholder="Mes"
+                                    title="Mes" autocomplete="off" value="{{ request.GET.Mes }}" style="width: 120px;">
+                                <div id="multiSelectContainerMes" class="multiSelectContainer" style="display: none; width: 120px;">
+                                    <select id="multiSelectMes" class="multiSelect" multiple style="min-width: 120px;">
+                                        {% for mes in meses %}
+                                        <option value="{{ mes.month }}">
+                                            {{ mes|date:"F"|default:"" }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="filterOptions" style="width: 120px;">
+                                        <button type="button" id="allButtonMes" class="btn">Todos</button>
+                                        <button type="button" id="okButtonMes" class="btn-ok">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filtro-section">
+                                <input id="multiSelectLabelStatus" type="text" name="Status" placeholder="Status"
+                                    title="Status" autocomplete="off" value="{{ request.GET.Status }}">
+                                <div id="multiSelectContainerStatus" class="multiSelectContainer" style="display: none;">
+                                    <select id="multiSelectStatus" class="multiSelect" multiple>
+                                        {% for s_ in status %}
+                                        <option value="{{ s_.id }}">
+                                            {{ s_|default:"" }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="filterOptions">
+                                        <button type="button" id="allButtonStatus" class="btn">Todos</button>
+                                        <button type="button" id="okButtonStatus" class="btn-ok">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex;">
+                                <div class="filtro-section">
+                                    <input type="text" name="filtro_geral" placeholder="Filtro Geral"
+                                        title="Filtro de informações para os campos de texto."
+                                        value="{{ request.GET.filtro_geral }}">
+                                </div>
+                                <button type="submit" class="btn">
+                                    <i class="fa fa-filter"></i>Filtrar
+                                </button>
+                                <a href="{% url 'compartilhar_eventos' %}" class="btn-inverse">
+                                    <i class="fa-solid fa-filter-circle-xmark"></i>Limpar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    
+                </div>
+                <div class="table-container" id="compartilhar-artista">
+                    <table class="table-eventos" id="eventTable">
+                        <thead>
+                            <tr class="title-group">
+                                <th colspan="2"></th>
+                                <th colspan="1">Contato</th>
+                                <th colspan="2">Diária</th>
+                                <th colspan="3">Produção Local</th>
+                                <th colspan="1" style="min-width: 50px;" class="remove"></th>
+                            </tr>
+                            <tr class="title">
+                                <th style="min-width: 50px;">Dia</th>
+                                <th>Cidade - UF</th>
+                                <th>Nome/Telefone</th>
+                                <th style="min-width: 50px;">S/N</th>
+                                <th>Valor</th>
+                                <th>Custos</th>
+                                <th>Operacional</th>
+                                <th>Anotações Gerais</th>
+                                <th style="min-width: 50px;" class="remove">Detalhe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if eventos %}
+                            {% for evento in eventos %}
+                            {% if evento.show_month_title %}
+                            <tr class="month-title">
+                                <td colspan="9">{{ evento.data_evento|date:"F | y" }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <!-- TODO: Precisa dos dados que vão ser compartilhados-->
+                                <td style="text-align: center;">{{ evento.data_evento|date:"d"|default:"" }}</td>
+                                <td>{{ evento.cidade|default:"" }} - {{ evento.uf|default:"" }}</td>
+                                <td>{{ evento.contato_nome_tel|default:"-" }}</td>
+                                <td style="text-align: center;">{{ evento.diaria|default:"-" }}</td>
+                                <td>{{ evento.valor_diaria|default:"" }}</td>
+                                <td>{{ evento.custos|default:"" }}</td>
+                                <td>{{ evento.operacional|default:"" }}</td>
+                                <td>{{ evento.anotacoes|default:"" }}</td>
+                                <td style="text-align: center;" class="remove">
+                                    <a href="{% url 'evento_detalhe' evento.pk %}?source_page=compartilhar_eventos" class="btn-inverse">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5">Sem eventos disponíveis</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inclua jQuery antes de qualquer script que dependa dele -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- Se estiver usando jQuery UI, inclua-o em seguida -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+        function exportarParaCSV() {
+            // Adicione os cabeçalhos do CSV
+            var headers = [
+                "Dia",
+                "Cidade - UF",
+                "Nome/Telefone",
+                "S/N",
+                "Valor",
+                "Custos",
+                "Operacional",
+                "Detalhe"
+            ];
+
+            // Adicione os dados ao CSV
+            var csvContent = headers.join(";") + "\r\n";
+
+            // Adicione os dados ao CSV
+            $("#eventTable tbody tr").each(function () {
+                var row = [];
+                $(this).find("td").each(function () {
+                    row.push('"' + $(this).text() + '"'); // Adiciona aspas para lidar com valores que contenham vírgulas
+                });
+                csvContent += row.join(";") + "\r\n";
+            });
+
+            // Crie um blob com os dados do CSV
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+
+            // Utilize a biblioteca FileSaver.js para salvar o arquivo
+            saveAs(blob, 'exportacao_eventos.csv');
+        }
+    </script>
+
+    <script>
+        document.getElementById("exportar").addEventListener("click", function () {
+            var tabela = document.getElementById("eventTable");
+            var wb = XLSX.utils.table_to_book(tabela, { sheet: "Eventos" });
+            XLSX.writeFile(wb, "Eventos.xlsx");
+        });
+    </script>
+
+    <script>
+        function printAssistanceTable() {
+        var conteudoDiv = document.getElementById('compartilhar-artista');
+
+        if (conteudoDiv) {
+
+            conteudoDiv.style.height = 'auto';
+
+            var detalheColumn = conteudoDiv.querySelectorAll('.remove');
+            detalheColumn.forEach(function (element) {
+                element.style.display = 'none';
+            });
+
+            html2canvas(conteudoDiv, {
+                height: conteudoDiv.scrollHeight, 
+                willReadFrequently: true
+            }).then(function (canvas) {
+                var imgData = canvas.toDataURL('image/png');
+
+                detalheColumn.forEach(function (element, index) {
+                    element.style.display = 'block';
+                });
+
+                var janelaImprimir = window.open('', '', 'width=1000,height=600');
+                janelaImprimir.document.write('<html><head><title>Eventos</title></head><body>');
+                janelaImprimir.document.write('<img src="' + imgData + '" width="100%">');
+                janelaImprimir.document.write('</body></html>');
+                janelaImprimir.document.close();
+
+                janelaImprimir.onload = function () {
+                    janelaImprimir.print();
+                    janelaImprimir.close();
+                };
+            });
+
+            conteudoDiv.style.height = '75vh';
+        } else {
+            console.error("Elemento 'compartilhar-artista' não encontrado.");
+        }
+    }
+    </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function setupMultiSelect(inputId, containerId, allButtonId, okButtonId, emptyButtonId, multiSelectId) {
+            var multiSelectContainer = document.getElementById(containerId);
+            var multiSelectLabel = document.getElementById(inputId);
+            var multiSelect = document.getElementById(multiSelectId);
+            var allButton = document.getElementById(allButtonId);
+            var okButton = document.getElementById(okButtonId);
+            var emptyButton = document.getElementById(emptyButtonId);
+
+            allButton.addEventListener("click", function () {
+                if (allButton.innerText === "Limpar") {
+                    Array.from(multiSelect.options).forEach(option => (option.selected = false));
+                    allButton.innerText = "Todos";
+                } else {
+                    Array.from(multiSelect.options).forEach(option => (option.selected = true));
+                    allButton.innerText = "Limpar";
+                }
+            });
+
+            multiSelectLabel.addEventListener("click", function () {
+                multiSelectContainer.style.display = "block";
+            });
+
+            okButton.addEventListener("click", function () {
+                multiSelectContainer.style.display = "none";
+                multiSelectLabel.value = Array.from(multiSelect.selectedOptions).map(option => option.value).join("; ");
+            });
+
+
+            document.addEventListener("click", function (event) {
+                if (!multiSelectContainer.contains(event.target) && event.target !== multiSelectLabel) {
+                    multiSelectContainer.style.display = "none";
+                }
+            });
+        }
+
+        setupMultiSelect('multiSelectLabelStatus', 'multiSelectContainerStatus', 'allButtonStatus', 'okButtonStatus', 'emptyButtonStatus', 'multiSelectStatus');
+        setupMultiSelect('multiSelectLabelAno', 'multiSelectContainerAno', 'allButtonAno', 'okButtonAno', 'emptyButtonAno', 'multiSelectAno');
+        setupMultiSelect('multiSelectLabelMes', 'multiSelectContainerMes', 'allButtonMes', 'okButtonMes', 'emptyButtonMes', 'multiSelectMes');
+    });
+</script>
+
+</body>
+{% endblock content %}
